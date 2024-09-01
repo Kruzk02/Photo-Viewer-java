@@ -1,20 +1,24 @@
 package gui;
 
+import controller.OpenFileListener;
+import model.ImageModel;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 
 public class MainGUI implements Runnable{
 
     private JFrame frame;
+    private ImagePanel imagePanel;
+    private ImageModel model;
 
     public MainGUI() {
+        model = new ImageModel();
     }
 
     @Override
     public void run() {
-        frame = new JFrame("Image");
+        frame = new JFrame();
 
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
 
@@ -22,14 +26,34 @@ public class MainGUI implements Runnable{
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setJMenuBar(createMenuBar());
 
-        ImagePanel imagePanel = new ImagePanel();
+        imagePanel = new ImagePanel(model);
 
         frame.add(imagePanel, BorderLayout.CENTER);
+
+        frame.add(new Panel(),BorderLayout.WEST);
+        frame.add(new Panel(),BorderLayout.EAST);
         frame.setVisible(true);
     }
 
-    public JFrame frame() {
+    public JMenuBar createMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+        JMenu menu = new JMenu("Open");
+        JMenuItem menuItem = new JMenuItem("File");
+        menuItem.addActionListener(new OpenFileListener(this,model));
+        menu.add(menuItem);
+        menuBar.add(menu);
+
+        return menuBar;
+    }
+
+    public JFrame getFrame() {
         return frame;
+    }
+
+    public void updateImagePanel(int width, int height) {
+        imagePanel.setPreferredSize(width, height);
+        imagePanel.repaint();
     }
 }
