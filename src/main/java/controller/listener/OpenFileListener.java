@@ -6,16 +6,16 @@ import model.ImageModel;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.Queue;
 
-public class OpenFileListener implements ActionListener {
+public class OpenFileListener implements FileSelection {
 
-    private MainGUI mainGUI;
-    private ImageModel model;
+    private final MainGUI mainGUI;
+    private final ImageModel model;
 
     public OpenFileListener(MainGUI mainGUI,ImageModel model) {
         this.mainGUI = mainGUI;
@@ -23,7 +23,8 @@ public class OpenFileListener implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void select() {
+
         JFileChooser chooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
                 "JPG & PNG Images", "jpg", "png");
@@ -39,16 +40,17 @@ public class OpenFileListener implements ActionListener {
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = chooser.getSelectedFile();
             model.setFile(selectedFile);
-            BufferedImage image;
+            display(selectedFile);
+        }
+    }
 
-            try {
-                image = ImageIO.read(selectedFile);
-                model.setImage(image);
-                mainGUI.updateImagePanel(image.getWidth(),
-                        image.getHeight());
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+    private void display(File currentFile) {
+        try {
+            BufferedImage image = ImageIO.read(currentFile);
+            model.setImage(image);
+            mainGUI.updateImagePanel(image.getWidth(),image.getHeight());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
