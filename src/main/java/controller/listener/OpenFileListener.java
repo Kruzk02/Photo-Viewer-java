@@ -1,5 +1,6 @@
-package controller;
+package controller.listener;
 
+import controller.FileSelection;
 import gui.MainGUI;
 import model.ImageModel;
 
@@ -9,8 +10,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.Queue;
 
 public class OpenFileListener implements FileSelection {
 
