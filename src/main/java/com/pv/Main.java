@@ -1,5 +1,7 @@
+package com.pv;
+
 import com.formdev.flatlaf.FlatLightLaf;
-import gui.MainGUI;
+import com.pv.gui.MainGUI;
 
 import javax.swing.*;
 

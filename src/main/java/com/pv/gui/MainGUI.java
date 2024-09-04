@@ -1,10 +1,15 @@
-package gui;
+package com.pv.gui;
 
-import controller.OpenFileListener;
-import model.ImageModel;
+import com.pv.controller.FileSelection;
+import com.pv.controller.FileSelector;
+import com.pv.controller.listener.OpenFileListener;
+import com.pv.controller.listener.OpenFolderListener;
+import com.pv.model.ImageModel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class MainGUI implements Runnable{
 
@@ -38,11 +43,34 @@ public class MainGUI implements Runnable{
     }
 
     public JMenuBar createMenuBar() {
+        FileSelection file = new OpenFileListener(this,model);
+        OpenFolderListener folder = new OpenFolderListener(this,model);
+
+        FileSelector fileSelector = new FileSelector(folder);
+
         JMenuBar menuBar = new JMenuBar();
         JMenu menu = new JMenu("Open");
         JMenuItem menuItem = new JMenuItem("File");
-        menuItem.addActionListener(new OpenFileListener(this,model));
+        menuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fileSelector.set(folder);
+                fileSelector.select();
+            }
+        });
+        JMenuItem next = new JMenuItem("Next");
+        next.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    folder.next();
+                } catch (NullPointerException ex) {
+                    JOptionPane.showMessageDialog(frame, ex);
+                }
+            }
+        });
         menu.add(menuItem);
+        menu.add(next);
         menuBar.add(menu);
 
         return menuBar;

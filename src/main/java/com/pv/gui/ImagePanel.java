@@ -1,6 +1,6 @@
-package gui;
+package com.pv.gui;
 
-import model.ImageModel;
+import com.pv.model.ImageModel;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,4 +1,4 @@
-package controller;
+package com.pv.controller;
 
 public class FileSelector {
     private FileSelection selection;

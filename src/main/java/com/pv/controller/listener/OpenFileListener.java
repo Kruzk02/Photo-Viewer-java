@@ -1,8 +1,8 @@
-package controller.listener;
+package com.pv.controller.listener;
 
-import controller.FileSelection;
-import gui.MainGUI;
-import model.ImageModel;
+import com.pv.controller.FileSelection;
+import com.pv.gui.MainGUI;
+import com.pv.model.ImageModel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
