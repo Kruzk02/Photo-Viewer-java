@@ -46,31 +46,24 @@ public class MainGUI implements Runnable{
         FileSelection file = new OpenFileListener(this,model);
         OpenFolderListener folder = new OpenFolderListener(this,model);
 
-        FileSelector fileSelector = new FileSelector(folder);
+        FileSelector fileSelector = new FileSelector(file);
+        FileSelector folderSelector = new FileSelector(folder);
 
         JMenuBar menuBar = new JMenuBar();
         JMenu menu = new JMenu("Open");
-        JMenuItem menuItem = new JMenuItem("File");
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                fileSelector.set(folder);
-                fileSelector.select();
-            }
+        JMenuItem fileMenuItem = new JMenuItem("File");
+        fileMenuItem.addActionListener(e -> {
+            fileSelector.set(file);
+            fileSelector.select();
         });
-        JMenuItem next = new JMenuItem("Next");
-        next.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    folder.next();
-                } catch (NullPointerException ex) {
-                    JOptionPane.showMessageDialog(frame, ex);
-                }
-            }
+
+        JMenuItem folderMenuItem = new JMenuItem("Folder");
+        folderMenuItem.addActionListener(e -> {
+            folderSelector.set(folder);
+            folderSelector.select();
         });
-        menu.add(menuItem);
-        menu.add(next);
+        menu.add(fileMenuItem);
+        menu.add(folderMenuItem);
         menuBar.add(menu);
 
         return menuBar;
