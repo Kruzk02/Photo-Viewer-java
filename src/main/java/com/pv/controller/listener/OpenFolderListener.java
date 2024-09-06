@@ -89,7 +89,8 @@ public class OpenFolderListener implements FileSelection {
 
     private void loadFilesFromFolder(File folder) {
         if (folder.isDirectory()) {
-            File[] fileList = folder.listFiles((dir,name) -> name.endsWith(".jpg") || name.endsWith(".png"));
+            File[] fileList = folder.listFiles((dir,name) ->
+                    name.toLowerCase().endsWith(".jpg") || name.toLowerCase().endsWith(".png"));
             if (fileList != null) {
                 Collections.addAll(files, fileList);
             }
