@@ -7,12 +7,16 @@ import com.pv.controller.listener.OpenFolderListener;
 import com.pv.model.ImageModel;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 
 public class MainGUI implements Runnable{
 
     private JFrame frame;
     private final ImagePanel imagePanel;
+    private final JPanel filePanel;
+    private JPanel topPanel;
+    private JPanel bottomPanel;
     private JButton nextButton;
     private JButton prevButton;
 
@@ -27,6 +31,8 @@ public class MainGUI implements Runnable{
     public MainGUI() {
         model = new ImageModel();
         imagePanel = new ImagePanel(model);
+        imagePanel.setBorder(new LineBorder(Color.GREEN));
+        filePanel = new JPanel();
 
         file = new OpenFileListener(this,model);
         folder = new OpenFolderListener(this,model);
@@ -46,49 +52,65 @@ public class MainGUI implements Runnable{
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.setJMenuBar(createMenuBar());
 
-        JPanel topPanel = new JPanel();
+        filePanel.setVisible(true);
+        filePanel.add(createOpenFile());
+        filePanel.add(new JLabel("OR"));
+        filePanel.add(createOpenFolder());
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 0;
+        gbc.gridheight = 0;
+        gbc.weightx = 0;
+        gbc.weighty = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
+        frame.add(filePanel,gbc);
+
+        topPanel = new JPanel();
         topPanel.setPreferredSize(new Dimension((int) dimension.getWidth(),50));
         topPanel.setBackground(Color.LIGHT_GRAY);
         topPanel.add(new JLabel("Top Panel"));
-        topPanel.setVisible(true);
+        topPanel.setVisible(false);
 
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 4;
-        gbc.weightx = 1;
+        gbc.weightx = 0;
         gbc.weighty = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.NORTH;
         frame.add(topPanel, gbc);
 
-        JPanel bottomPanel = new JPanel();
+        bottomPanel = new JPanel();
         bottomPanel.setPreferredSize(new Dimension((int) dimension.getWidth(),50));
         bottomPanel.setBackground(Color.LIGHT_GRAY);
         bottomPanel.add(new JLabel("Bottom Panel"));
-        bottomPanel.setVisible(true);
+        bottomPanel.setVisible(false);
 
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.gridwidth = 4;
-        gbc.weightx = 1;
+        gbc.weightx = 0;
         gbc.weighty = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.SOUTH;
         frame.add(bottomPanel, gbc);
 
+        imagePanel.setVisible(false);
         gbc.gridx = 2;
         gbc.gridy = 1;
-        gbc.gridwidth = 1;
+        gbc.gridwidth = 0;
+        gbc.gridheight = 0;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        gbc.fill = GridBagConstraints.BOTH;
+        gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.CENTER;
         frame.add(imagePanel, gbc);
 
         prevButton = new JButton("Prev");
-        prevButton.setVisible(true);
+        prevButton.setVisible(false);
         prevButton.addActionListener(e -> folder.prev());
 
         gbc.gridx = 1;
@@ -100,7 +122,7 @@ public class MainGUI implements Runnable{
         frame.add(prevButton, gbc);
 
         nextButton = new JButton("Next");
-        nextButton.setVisible(true);
+        nextButton.setVisible(false);
         nextButton.addActionListener(e -> folder.next());
 
         gbc.gridx = 3;
@@ -111,51 +133,53 @@ public class MainGUI implements Runnable{
         gbc.anchor = GridBagConstraints.LINE_END;
         frame.add(nextButton, gbc);
 
-
-        frame.revalidate();
-        frame.repaint();
-
         frame.setVisible(true);
     }
 
+    private JButton createOpenFile() {
+        JButton button = new JButton("Open file image");
+        button.addActionListener(e -> {
+            fileSelector.set(file);
+            fileSelector.select();
 
-
-    private JMenuBar createMenuBar() {
-        JMenuBar menuBar = new JMenuBar();
-        JMenu menu = new JMenu("Open");
-        JMenuItem fileMenuItem = getFileMenuItem();
-
-        JMenuItem folderMenuItem = new JMenuItem("Folder");
-        folderMenuItem.addActionListener(e -> {
-            folderSelector.set(folder);
-            folderSelector.select();
             if (model.getImage() != null) {
-                prevButton.setVisible(true);
+                filePanel.setVisible(false);
+                topPanel.setVisible(true);
+                bottomPanel.setVisible(true);
                 imagePanel.setVisible(true);
+            }else {
+                filePanel.setVisible(true);
+                topPanel.setVisible(false);
+                bottomPanel.setVisible(false);
+                imagePanel.setVisible(false);
+            }
+        });
+        return button;
+    }
+
+    private JButton createOpenFolder() {
+        JButton button = new JButton("Open folder image");
+        button.addActionListener(e -> {
+            fileSelector.set(folder);
+            fileSelector.select();
+
+            if (model.getImage() != null) {
+                filePanel.setVisible(false);
+                topPanel.setVisible(true);
+                bottomPanel.setVisible(true);
+                imagePanel.setVisible(true);
+                prevButton.setVisible(true);
                 nextButton.setVisible(true);
             }else {
+                filePanel.setVisible(true);
+                topPanel.setVisible(false);
+                bottomPanel.setVisible(false);
                 imagePanel.setVisible(false);
                 prevButton.setVisible(false);
                 nextButton.setVisible(false);
             }
         });
-        menu.add(fileMenuItem);
-        menu.add(folderMenuItem);
-        menuBar.add(menu);
-
-        return menuBar;
-    }
-
-    private JMenuItem getFileMenuItem() {
-        JMenuItem fileMenuItem = new JMenuItem("File");
-        fileMenuItem.addActionListener(e -> {
-            fileSelector.set(file);
-            fileSelector.select();
-            imagePanel.setVisible(model.getFile() != null);
-            prevButton.setVisible(false);
-            nextButton.setVisible(false);
-        });
-        return fileMenuItem;
+        return button;
     }
 
     public JFrame getFrame() {
@@ -163,7 +187,7 @@ public class MainGUI implements Runnable{
     }
 
     public void updateImagePanel(int width, int height) {
-        imagePanel.setPreferredSize(width, height);
+        imagePanel.setPreferredSize(width - 30, height - 30);
         imagePanel.repaint();
     }
 }
