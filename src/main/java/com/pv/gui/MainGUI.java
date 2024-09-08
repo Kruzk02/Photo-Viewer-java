@@ -1,5 +1,6 @@
 package com.pv.gui;
 
+import com.pv.builder.GridBagConstraintsBuilder;
 import com.pv.controller.FileSelection;
 import com.pv.controller.FileSelector;
 import com.pv.controller.listener.OpenFileListener;
@@ -7,12 +8,11 @@ import com.pv.controller.listener.OpenFolderListener;
 import com.pv.model.ImageModel;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 
 public class MainGUI implements Runnable{
 
-    private JFrame frame;
+    private final JFrame frame;
     private final ImagePanel imagePanel;
     private final JPanel filePanel;
     private JPanel topPanel;
@@ -22,30 +22,27 @@ public class MainGUI implements Runnable{
 
     private final ImageModel model;
 
-    FileSelection file;
-    OpenFolderListener folder;
+    private final FileSelection file;
+    private final OpenFolderListener folder;
 
-    FileSelector fileSelector;
-    FileSelector folderSelector;
+    private final FileSelector fileSelector;
 
     public MainGUI() {
+        frame = new JFrame();
         model = new ImageModel();
         imagePanel = new ImagePanel(model);
-        imagePanel.setBorder(new LineBorder(Color.GREEN));
         filePanel = new JPanel();
 
         file = new OpenFileListener(this,model);
         folder = new OpenFolderListener(this,model);
 
-        fileSelector = new FileSelector(file);
-        folderSelector = new FileSelector(folder);
+        fileSelector = new FileSelector();
     }
 
     @Override
     public void run() {
-        frame = new JFrame();
         frame.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
+        GridBagConstraints gbc;
 
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
         frame.setSize((int) dimension.getWidth(), (int) dimension.getHeight());
@@ -57,15 +54,9 @@ public class MainGUI implements Runnable{
         filePanel.add(createOpenFile());
         filePanel.add(new JLabel("OR"));
         filePanel.add(createOpenFolder());
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 0;
-        gbc.gridheight = 0;
-        gbc.weightx = 0;
-        gbc.weighty = 0;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.CENTER;
+        gbc = new GridBagConstraintsBuilder.Builder()
+                .setAnchor(GridBagConstraints.CENTER)
+                .build();
         frame.add(filePanel,gbc);
 
         topPanel = new JPanel();
@@ -73,14 +64,10 @@ public class MainGUI implements Runnable{
         topPanel.setBackground(Color.LIGHT_GRAY);
         topPanel.add(new JLabel("Top Panel"));
         topPanel.setVisible(false);
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 4;
-        gbc.weightx = 0;
-        gbc.weighty = 0;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.NORTH;
+        gbc = new GridBagConstraintsBuilder.Builder()
+                .setGridWidth(4)
+                .setAnchor(GridBagConstraints.NORTH)
+                .build();
         frame.add(topPanel, gbc);
 
         bottomPanel = new JPanel();
@@ -88,56 +75,51 @@ public class MainGUI implements Runnable{
         bottomPanel.setBackground(Color.LIGHT_GRAY);
         bottomPanel.add(new JLabel("Bottom Panel"));
         bottomPanel.setVisible(false);
-
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.gridwidth = 4;
-        gbc.weightx = 0;
-        gbc.weighty = 0;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.SOUTH;
+        gbc = new GridBagConstraintsBuilder.Builder()
+                .setGridY(2)
+                .setGridWidth(4)
+                .setAnchor(GridBagConstraints.SOUTH)
+                .build();
         frame.add(bottomPanel, gbc);
 
         imagePanel.setVisible(false);
-        gbc.gridx = 2;
-        gbc.gridy = 1;
-        gbc.gridwidth = 0;
-        gbc.gridheight = 0;
-        gbc.weightx = 1;
-        gbc.weighty = 1;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.CENTER;
+        gbc = new GridBagConstraintsBuilder.Builder()
+                .setGridX(2).setGridY(1)
+                .setWeightX(1).setWeightY(1)
+                .setAnchor(GridBagConstraints.CENTER)
+                .build();
         frame.add(imagePanel, gbc);
 
-        prevButton = new JButton("Prev");
-        prevButton.setVisible(false);
+        prevButton = createButton("Prev");
         prevButton.addActionListener(e -> folder.prev());
-
-        gbc.gridx = 1;
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        gbc.weightx = 0;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.LINE_START;
+        gbc = new GridBagConstraintsBuilder.Builder()
+                .setGridX(1).setGridY(1)
+                .setGridWidth(1)
+                .setAnchor(GridBagConstraints.LINE_START)
+                .build();
         frame.add(prevButton, gbc);
 
-        nextButton = new JButton("Next");
-        nextButton.setVisible(false);
+        nextButton = createButton("Next");
         nextButton.addActionListener(e -> folder.next());
-
-        gbc.gridx = 3;
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        gbc.weightx = 0;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.LINE_END;
+        gbc = new GridBagConstraintsBuilder.Builder()
+                .setGridX(3).setGridY(1)
+                .setGridWidth(1)
+                .setAnchor(GridBagConstraints.LINE_END)
+                .build();
         frame.add(nextButton, gbc);
 
         frame.setVisible(true);
     }
 
+    private JButton createButton(String text) {
+        JButton button = new JButton(text);
+        button.setVisible(false);
+        return button;
+    }
+
     private JButton createOpenFile() {
         JButton button = new JButton("Open file image");
+        button.setPreferredSize(new Dimension(130,20));
         button.addActionListener(e -> {
             fileSelector.set(file);
             fileSelector.select();
@@ -159,6 +141,7 @@ public class MainGUI implements Runnable{
 
     private JButton createOpenFolder() {
         JButton button = new JButton("Open folder image");
+        button.setPreferredSize(new Dimension(130,20));
         button.addActionListener(e -> {
             fileSelector.set(folder);
             fileSelector.select();
