@@ -3,6 +3,9 @@ package com.pv.controller;
 public class FileSelector {
     private FileSelection selection;
 
+    public FileSelector() {
+    }
+
     public FileSelector(FileSelection selection) {
         this.selection = selection;
     }
@@ -12,6 +15,10 @@ public class FileSelector {
     }
 
     public void select() {
-        selection.select();
+        if (selection != null) {
+            selection.select();
+        }else {
+            throw new NullPointerException();
+        }
     }
 }
