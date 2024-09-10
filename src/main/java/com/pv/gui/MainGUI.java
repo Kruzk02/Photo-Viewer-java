@@ -15,10 +15,12 @@ public class MainGUI implements Runnable{
     private final JFrame frame;
     private final ImagePanel imagePanel;
     private final JPanel filePanel;
+    private JPanel centerPanel;
     private JPanel topPanel;
     private JPanel bottomPanel;
     private JButton nextButton;
     private JButton prevButton;
+    private CardLayout cl;
 
     private final ImageModel model;
 
@@ -42,122 +44,140 @@ public class MainGUI implements Runnable{
     @Override
     public void run() {
         frame.setLayout(new GridBagLayout());
+        frame.setBackground(Color.LIGHT_GRAY);
         GridBagConstraints gbc;
 
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
-        frame.setSize((int) dimension.getWidth(), (int) dimension.getHeight());
+        frame.setSize(800,600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+
+        centerPanel = new JPanel(new CardLayout());
+        gbc = new GridBagConstraintsBuilder.Builder()
+                .setGridX(1).setGridY(1)
+                .setGridWidth(1).setGridHeight(1)
+                .setWeightX(1.0).setWeightY(1.0)
+                .setFill(GridBagConstraints.BOTH)
+                .build();
+        frame.add(centerPanel, gbc);
 
         filePanel.setVisible(true);
         filePanel.add(createOpenFile());
         filePanel.add(new JLabel("OR"));
         filePanel.add(createOpenFolder());
-        gbc = new GridBagConstraintsBuilder.Builder()
-                .setAnchor(GridBagConstraints.CENTER)
-                .build();
-        frame.add(filePanel,gbc);
+        centerPanel.add(filePanel, "FilePanel");
+
+        imagePanel.setVisible(false);
+        centerPanel.add(imagePanel, "ImagePanel");
 
         topPanel = new JPanel();
-        topPanel.setPreferredSize(new Dimension((int) dimension.getWidth(),50));
+        topPanel.setPreferredSize(new Dimension((int) dimension.getWidth(), 35));
         topPanel.setBackground(Color.LIGHT_GRAY);
         topPanel.add(new JLabel("Top Panel"));
         topPanel.setVisible(false);
         gbc = new GridBagConstraintsBuilder.Builder()
-                .setGridWidth(4)
-                .setAnchor(GridBagConstraints.NORTH)
+                .setGridWidth(3).setGridHeight(1)
+                .setFill(GridBagConstraints.HORIZONTAL)
                 .build();
         frame.add(topPanel, gbc);
 
-        bottomPanel = new JPanel();
-        bottomPanel.setPreferredSize(new Dimension((int) dimension.getWidth(),50));
+        bottomPanel = new JPanel(new GridBagLayout());
+        bottomPanel.setPreferredSize(new Dimension((int) dimension.getWidth(), 35));
         bottomPanel.setBackground(Color.LIGHT_GRAY);
         bottomPanel.add(new JLabel("Bottom Panel"));
         bottomPanel.setVisible(false);
         gbc = new GridBagConstraintsBuilder.Builder()
                 .setGridY(2)
-                .setGridWidth(4)
-                .setAnchor(GridBagConstraints.SOUTH)
+                .setGridWidth(3).setGridHeight(1)
+                .setWeightX(1.0)
+                .setFill(GridBagConstraints.HORIZONTAL)
                 .build();
         frame.add(bottomPanel, gbc);
 
-        imagePanel.setVisible(false);
-        gbc = new GridBagConstraintsBuilder.Builder()
-                .setGridX(2).setGridY(1)
-                .setWeightX(1).setWeightY(1)
-                .setAnchor(GridBagConstraints.CENTER)
-                .build();
-        frame.add(imagePanel, gbc);
-
-        prevButton = createButton("Prev");
+        JPanel westPanel = new JPanel(new GridBagLayout());
+        prevButton = new Button("Prev");
         prevButton.addActionListener(e -> folder.prev());
         gbc = new GridBagConstraintsBuilder.Builder()
-                .setGridX(1).setGridY(1)
-                .setGridWidth(1)
-                .setAnchor(GridBagConstraints.LINE_START)
+                .setGridY(1)
+                .setGridWidth(1).setGridHeight(1)
+                .setWeightY(1.0)
+                .setFill(GridBagConstraints.NONE)
+                .setAnchor(GridBagConstraints.CENTER)
                 .build();
-        frame.add(prevButton, gbc);
+        westPanel.add(prevButton, gbc);
+        gbc = new GridBagConstraintsBuilder.Builder()
+                .setGridY(1)
+                .setGridWidth(1).setGridHeight(2)
+                .setWeightY(1.0)
+                .setFill(GridBagConstraints.BOTH)
+                .build();
+        frame.add(westPanel, gbc);
 
-        nextButton = createButton("Next");
+        JPanel eastPanel = new JPanel(new GridBagLayout());
+        nextButton = new Button("Next");
         nextButton.addActionListener(e -> folder.next());
         gbc = new GridBagConstraintsBuilder.Builder()
-                .setGridX(3).setGridY(1)
-                .setGridWidth(1)
-                .setAnchor(GridBagConstraints.LINE_END)
+                .setGridX(2).setGridY(1)
+                .setGridWidth(1).setGridHeight(1)
+                .setWeightY(1.0)
+                .setFill(GridBagConstraints.NONE)
+                .setAnchor(GridBagConstraints.CENTER)
                 .build();
-        frame.add(nextButton, gbc);
+        eastPanel.add(nextButton, gbc);
+
+        gbc = new GridBagConstraintsBuilder.Builder()
+                .setGridX(2).setGridY(1)
+                .setGridWidth(1).setGridHeight(2)
+                .setWeightY(1.0)
+                .setFill(GridBagConstraints.BOTH)
+                .build();
+        frame.add(eastPanel, gbc);
+
+        cl = (CardLayout) (centerPanel.getLayout());
+        cl.show(centerPanel, "FilePanel");
 
         frame.setVisible(true);
     }
 
-    private JButton createButton(String text) {
-        JButton button = new JButton(text);
-        button.setVisible(false);
-        return button;
-    }
-
     private JButton createOpenFile() {
-        JButton button = new JButton("Open file image");
+        JButton button = new Button("Open file image");
         button.setPreferredSize(new Dimension(130,20));
+        button.setVisible(true);
         button.addActionListener(e -> {
             fileSelector.set(file);
             fileSelector.select();
 
             if (model.getImage() != null) {
-                filePanel.setVisible(false);
+                cl.show(centerPanel,"ImagePanel");
                 topPanel.setVisible(true);
                 bottomPanel.setVisible(true);
-                imagePanel.setVisible(true);
             }else {
-                filePanel.setVisible(true);
+                cl.show(centerPanel,"FilePanel");
                 topPanel.setVisible(false);
                 bottomPanel.setVisible(false);
-                imagePanel.setVisible(false);
             }
         });
         return button;
     }
 
     private JButton createOpenFolder() {
-        JButton button = new JButton("Open folder image");
-        button.setPreferredSize(new Dimension(130,20));
+        JButton button = new Button("Open folder image");
+        button.setVisible(true);
         button.addActionListener(e -> {
             fileSelector.set(folder);
             fileSelector.select();
 
             if (model.getImage() != null) {
-                filePanel.setVisible(false);
+                cl.show(centerPanel,"ImagePanel");
                 topPanel.setVisible(true);
                 bottomPanel.setVisible(true);
-                imagePanel.setVisible(true);
                 prevButton.setVisible(true);
                 nextButton.setVisible(true);
             }else {
-                filePanel.setVisible(true);
+                cl.show(centerPanel,"FilePanel");
                 topPanel.setVisible(false);
                 bottomPanel.setVisible(false);
-                imagePanel.setVisible(false);
                 prevButton.setVisible(false);
                 nextButton.setVisible(false);
             }
@@ -170,7 +190,7 @@ public class MainGUI implements Runnable{
     }
 
     public void updateImagePanel(int width, int height) {
-        imagePanel.setPreferredSize(width - 30, height - 30);
+        imagePanel.setPreferredSize(width, height);
         imagePanel.repaint();
     }
 }
