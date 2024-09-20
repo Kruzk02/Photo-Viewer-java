@@ -21,6 +21,7 @@ public class MainGUI implements Runnable{
     private JButton nextButton;
     private JButton prevButton;
     private CardLayout cl;
+    private GridBagConstraints gbc;
 
     private final ImageModel model;
 
@@ -43,16 +44,43 @@ public class MainGUI implements Runnable{
 
     @Override
     public void run() {
+        setupFrame();
+        cl = (CardLayout) (centerPanel.getLayout());
+        cl.show(centerPanel, "FilePanel");
+
+        frame.setVisible(true);
+    }
+
+    public JFrame getFrame() {
+        return frame;
+    }
+
+    public void updateImagePanel(int width, int height) {
+        imagePanel.setPreferredSize(width, height);
+        imagePanel.repaint();
+    }
+
+    private void setupFrame() {
         frame.setLayout(new GridBagLayout());
         frame.setBackground(Color.LIGHT_GRAY);
-        GridBagConstraints gbc;
 
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
         frame.setSize(800,600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        addPanelsToFrame(dimension);
+    }
 
+    private void addPanelsToFrame(Dimension dimension) {
+        frame.add(createCenterPanel(), gbc);
+        frame.add(createTopPanel(dimension), gbc);
+        frame.add(createBottomPanel(dimension), gbc);
+        frame.add(createWestPanel(), gbc);
+        frame.add(createEastPanel(), gbc);
+    }
+
+    private JPanel createCenterPanel() {
         centerPanel = new JPanel(new CardLayout());
         gbc = new GridBagConstraintsBuilder.Builder()
                 .setGridX(1).setGridY(1)
@@ -60,8 +88,6 @@ public class MainGUI implements Runnable{
                 .setWeightX(1.0).setWeightY(1.0)
                 .setFill(GridBagConstraints.BOTH)
                 .build();
-        frame.add(centerPanel, gbc);
-
         filePanel.setVisible(true);
         filePanel.add(createOpenFile());
         filePanel.add(new JLabel("OR"));
@@ -70,7 +96,10 @@ public class MainGUI implements Runnable{
 
         imagePanel.setVisible(false);
         centerPanel.add(imagePanel, "ImagePanel");
+        return centerPanel;
+    }
 
+    private JPanel createTopPanel(Dimension dimension) {
         topPanel = new JPanel();
         topPanel.setPreferredSize(new Dimension((int) dimension.getWidth(), 35));
         topPanel.setBackground(Color.LIGHT_GRAY);
@@ -80,8 +109,10 @@ public class MainGUI implements Runnable{
                 .setGridWidth(3).setGridHeight(1)
                 .setFill(GridBagConstraints.HORIZONTAL)
                 .build();
-        frame.add(topPanel, gbc);
+        return topPanel;
+    }
 
+    private JPanel createBottomPanel(Dimension dimension) {
         bottomPanel = new JPanel(new GridBagLayout());
         bottomPanel.setPreferredSize(new Dimension((int) dimension.getWidth(), 35));
         bottomPanel.setBackground(Color.LIGHT_GRAY);
@@ -93,8 +124,10 @@ public class MainGUI implements Runnable{
                 .setWeightX(1.0)
                 .setFill(GridBagConstraints.HORIZONTAL)
                 .build();
-        frame.add(bottomPanel, gbc);
+        return bottomPanel;
+    }
 
+    private JPanel createWestPanel() {
         JPanel westPanel = new JPanel(new GridBagLayout());
         prevButton = new Button("Prev");
         prevButton.addActionListener(e -> folder.prev());
@@ -112,8 +145,10 @@ public class MainGUI implements Runnable{
                 .setWeightY(1.0)
                 .setFill(GridBagConstraints.BOTH)
                 .build();
-        frame.add(westPanel, gbc);
+        return westPanel;
+    }
 
+    private JPanel createEastPanel() {
         JPanel eastPanel = new JPanel(new GridBagLayout());
         nextButton = new Button("Next");
         nextButton.addActionListener(e -> folder.next());
@@ -132,12 +167,7 @@ public class MainGUI implements Runnable{
                 .setWeightY(1.0)
                 .setFill(GridBagConstraints.BOTH)
                 .build();
-        frame.add(eastPanel, gbc);
-
-        cl = (CardLayout) (centerPanel.getLayout());
-        cl.show(centerPanel, "FilePanel");
-
-        frame.setVisible(true);
+        return eastPanel;
     }
 
     private JButton createOpenFile() {
@@ -185,12 +215,4 @@ public class MainGUI implements Runnable{
         return button;
     }
 
-    public JFrame getFrame() {
-        return frame;
-    }
-
-    public void updateImagePanel(int width, int height) {
-        imagePanel.setPreferredSize(width, height);
-        imagePanel.repaint();
-    }
 }
