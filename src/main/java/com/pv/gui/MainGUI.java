@@ -1,14 +1,19 @@
 package com.pv.gui;
 
 import com.pv.builder.GridBagConstraintsBuilder;
-import com.pv.controller.FileSelection;
-import com.pv.controller.FileSelector;
-import com.pv.controller.listener.OpenFileListener;
-import com.pv.controller.listener.OpenFolderListener;
+import com.pv.compoment.Button;
+import com.pv.compoment.ImagePanel;
+import com.pv.folder.FolderIterator;
+import com.pv.folder.FolderIteratorImpl;
+import com.pv.folder.FolderSelector;
 import com.pv.model.ImageModel;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class MainGUI implements Runnable{
 
@@ -25,21 +30,15 @@ public class MainGUI implements Runnable{
 
     private final ImageModel model;
 
-    private final FileSelection file;
-    private final OpenFolderListener folder;
-
-    private final FileSelector fileSelector;
-
+    private final FolderSelector folderSelector;
+    private FolderIterator folderIterator;
     public MainGUI() {
         frame = new JFrame();
         model = new ImageModel();
         imagePanel = new ImagePanel(model);
         filePanel = new JPanel();
 
-        file = new OpenFileListener(this,model);
-        folder = new OpenFolderListener(this,model);
-
-        fileSelector = new FileSelector();
+        folderSelector = new FolderSelector();
     }
 
     @Override
@@ -89,8 +88,6 @@ public class MainGUI implements Runnable{
                 .setFill(GridBagConstraints.BOTH)
                 .build();
         filePanel.setVisible(true);
-        filePanel.add(createOpenFile());
-        filePanel.add(new JLabel("OR"));
         filePanel.add(createOpenFolder());
         centerPanel.add(filePanel, "FilePanel");
 
@@ -130,7 +127,9 @@ public class MainGUI implements Runnable{
     private JPanel createWestPanel() {
         JPanel westPanel = new JPanel(new GridBagLayout());
         prevButton = new Button("Prev");
-        prevButton.addActionListener(e -> folder.prev());
+        prevButton.addActionListener(e -> {
+            if (folderIterator.hasPrev()) display(folderIterator.prev());
+        });
         gbc = new GridBagConstraintsBuilder.Builder()
                 .setGridY(1)
                 .setGridWidth(1).setGridHeight(1)
@@ -151,7 +150,9 @@ public class MainGUI implements Runnable{
     private JPanel createEastPanel() {
         JPanel eastPanel = new JPanel(new GridBagLayout());
         nextButton = new Button("Next");
-        nextButton.addActionListener(e -> folder.next());
+        nextButton.addActionListener(e -> {
+            if (folderIterator.hasNext()) display(folderIterator.next());
+        });
         gbc = new GridBagConstraintsBuilder.Builder()
                 .setGridX(2).setGridY(1)
                 .setGridWidth(1).setGridHeight(1)
@@ -170,33 +171,13 @@ public class MainGUI implements Runnable{
         return eastPanel;
     }
 
-    private JButton createOpenFile() {
-        JButton button = new Button("Open file image");
-        button.setPreferredSize(new Dimension(130,20));
-        button.setVisible(true);
-        button.addActionListener(e -> {
-            fileSelector.set(file);
-            fileSelector.select();
-
-            if (model.getImage() != null) {
-                cl.show(centerPanel,"ImagePanel");
-                topPanel.setVisible(true);
-                bottomPanel.setVisible(true);
-            }else {
-                cl.show(centerPanel,"FilePanel");
-                topPanel.setVisible(false);
-                bottomPanel.setVisible(false);
-            }
-        });
-        return button;
-    }
-
     private JButton createOpenFolder() {
         JButton button = new Button("Open folder image");
         button.setVisible(true);
         button.addActionListener(e -> {
-            fileSelector.set(folder);
-            fileSelector.select();
+            File[] files = folderSelector.select();
+            folderIterator = new FolderIteratorImpl(files);
+            display(files[0]);
 
             if (model.getImage() != null) {
                 cl.show(centerPanel,"ImagePanel");
@@ -215,4 +196,13 @@ public class MainGUI implements Runnable{
         return button;
     }
 
+    private void display(File currentFile) {
+        try {
+            BufferedImage image = ImageIO.read(currentFile);
+            model.setImage(image);
+            this.updateImagePanel(image.getWidth(),image.getHeight());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
