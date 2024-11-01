@@ -113,8 +113,15 @@ public class MainGUI implements Runnable{
         bottomPanel = new JPanel(new GridBagLayout());
         bottomPanel.setPreferredSize(new Dimension((int) dimension.getWidth(), 35));
         bottomPanel.setBackground(Color.LIGHT_GRAY);
-        bottomPanel.add(new JLabel("Bottom Panel"));
+        Button zoomIn = new Button("zoom in");
+        zoomIn.addActionListener(e -> imagePanel.zoomIn());
+        zoomIn.setVisible(true);
+        Button zoomOut = new Button("zoom out");
+        zoomOut.addActionListener(e -> imagePanel.zoomOut());
+        zoomOut.setVisible(true);
         bottomPanel.setVisible(false);
+        bottomPanel.add(zoomIn);
+        bottomPanel.add(zoomOut);
         gbc = new GridBagConstraintsBuilder.Builder()
                 .setGridY(2)
                 .setGridWidth(3).setGridHeight(1)

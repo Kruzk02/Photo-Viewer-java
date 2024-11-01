@@ -8,13 +8,34 @@ import java.awt.*;
 public class ImagePanel extends JPanel {
 
     private final ImageModel model;
+    private double zoomFactor = 1.0;
 
     public ImagePanel(ImageModel model) {
         this.model = model;
     }
+    public void zoomIn() {
+        zoomFactor *= 1.2; // Increase zoom factor by 20%
+        updatePreferredSize();
+        repaint();
+    }
 
+    public void zoomOut() {
+        zoomFactor /= 1.2; // Decrease zoom factor by 20%
+        updatePreferredSize();
+        repaint();
+    }
+
+    private void updatePreferredSize() {
+        if (model.getImage() != null) {
+            int imgWidth = (int) (model.getImage().getWidth() * zoomFactor);
+            int imgHeight = (int) (model.getImage().getHeight() * zoomFactor);
+            super.setPreferredSize(new Dimension(imgWidth, imgHeight));
+            revalidate(); // Revalidate the panel to update layout
+        }
+    }
     public void setPreferredSize(int width, int height) {
         this.setPreferredSize(new Dimension(width,height));
+        revalidate();
     }
 
     @Override
@@ -32,20 +53,20 @@ public class ImagePanel extends JPanel {
             int imgWidth = model.getImage().getWidth();
             int imgHeight = model.getImage().getHeight();
 
-            double aspectRatio = (double) imgWidth / imgHeight;
+            int zoomedWidth = (int) (imgWidth * zoomFactor);
+            int zoomedHeight = (int) (imgHeight * zoomFactor);
 
-            int newWidth = panelWidth;
-            int newHeight = (int) (newWidth / aspectRatio);
+            double aspectRatio = (double) imgWidth / imgHeight * zoomFactor;
 
-            if (newHeight > panelHeight) {
-                newHeight = panelHeight;
-                newWidth = (int) (newHeight * aspectRatio);
+            if (zoomedHeight > imgHeight) {
+                zoomedWidth = Math.max(zoomedHeight, (int) (panelHeight * aspectRatio));
+                zoomedHeight = Math.max(zoomedWidth, (int) (panelWidth / aspectRatio));
             }
 
-            int x = (panelWidth - newWidth) / 2;
-            int y = (panelHeight - newHeight) / 2;
-            g2d.drawImage(model.getImage(), x, y, newWidth, newHeight, this);
+            int x = (panelWidth - zoomedWidth) / 2;
+            int y = (panelHeight - zoomedHeight) / 2;
+
+            g2d.drawImage(model.getImage(), x, y, zoomedWidth, zoomedHeight, this);
         }
     }
-
 }
