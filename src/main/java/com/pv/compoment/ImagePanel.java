@@ -8,36 +8,30 @@ import java.awt.*;
 public class ImagePanel extends JPanel {
 
     private final ImageModel model;
-    private double zoomFactor = 1.0;
+    private final Zoom zoom;
 
     public ImagePanel(ImageModel model) {
         this.model = model;
+        this.zoom = new Zoom();
     }
 
     public void zoomIn() {
-        if (zoomFactor < 5.0) {
-            zoomFactor *= 1.2;
-            updatePreferredSize();
-            repaint();
-        }
+        zoom.setZoomFactor(zoom.zoomIn());
+        updatePreferredSize();
+        repaint();
     }
 
     public void zoomOut() {
-        if (zoomFactor > 0.3) {
-            zoomFactor /= 1.2;
-            updatePreferredSize();
-            repaint();
-        }
+        zoom.setZoomFactor(zoom.zoomOut());
+        updatePreferredSize();
+        repaint();
     }
 
     private void updatePreferredSize() {
-        if (model.getImage() != null) {
-            int imgWidth = (int) (model.getImage().getWidth() * zoomFactor);
-            int imgHeight = (int) (model.getImage().getHeight() * zoomFactor);
-            super.setPreferredSize(new Dimension(imgWidth, imgHeight));
-            revalidate();
-        }
+        setPreferredSize(new Dimension(model.getImage().getWidth(), model.getImage().getHeight()));
+        revalidate();
     }
+
     public void setPreferredSize(int width, int height) {
         this.setPreferredSize(new Dimension(width,height));
         revalidate();
@@ -58,8 +52,8 @@ public class ImagePanel extends JPanel {
             int imgWidth = model.getImage().getWidth();
             int imgHeight = model.getImage().getHeight();
 
-            int zoomedWidth = (int) (imgWidth * zoomFactor);
-            int zoomedHeight = (int) (imgHeight * zoomFactor);
+            int zoomedWidth = (int) (imgWidth * zoom.getZoomFactor());
+            int zoomedHeight = (int) (imgHeight * zoom.getZoomFactor());
 
             int x = (panelWidth - zoomedWidth) / 2;
             int y = (panelHeight - zoomedHeight) / 2;
